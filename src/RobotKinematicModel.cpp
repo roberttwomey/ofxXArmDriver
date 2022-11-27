@@ -69,7 +69,37 @@ void RobotKinematicModel::setup(RobotType type){
         joints[4].position.set(0, -0.16395, 1.3733);       //(-1.3733,0.000,-.1639);   //
         joints[5].position.set(0, -0.22535, 1.4273);        //(-1.4273,0.000,-.2561);   //
 
-    } else if (type == RobotType::XARM7) {
+    } 
+
+    if (type == RobotType::UR10 || type == RobotType::UR5) {
+        tool.position.set(joints[5].position + ofVec3f(0,-0.0308,0)); // flange position
+        
+        for(int i = 1; i <joints.size(); i++){
+            joints[i].offset =joints[i].position-joints[i-1].position;
+            
+        }
+        tool.offset = joints[5].offset;
+        
+        // Setup the joint axes
+        joints[0].axis.set(0, 0, 1);
+        joints[1].axis.set(0, -1, 0);
+        joints[2].axis.set(0, -1, 0);
+        joints[3].axis.set(0, -1, 0);
+        joints[4].axis.set(0, 0, 1);
+        joints[5].axis.set(0, 1, 0);
+
+        tool.axis.set(joints[5].axis);
+
+        joints[0].rotation.makeRotate(0,joints[0].axis);
+        joints[1].rotation.makeRotate(-90,joints[1].axis);
+        joints[2].rotation.makeRotate(0,joints[2].axis);
+        joints[3].rotation.makeRotate(-90,joints[3].axis);
+        joints[4].rotation.makeRotate(0,joints[4].axis);
+        joints[5].rotation.makeRotate(0,joints[5].axis);
+
+    }
+
+    if (type == RobotType::XARM7) {
 
         // xarm7 7-DOF
         joints.resize(7);
@@ -78,6 +108,8 @@ void RobotKinematicModel::setup(RobotType type){
         foojoints.resize(7);
 
         ofLog() << "Setting up XARM7";
+
+        // 3d files are here /Volumes/Work/Projects/on-display/solids/xarm_of
 
         if(loader.loadModel(ofToDataPath("models/xarm7/link_base.dae"))){
             // ofLog() << "numMeshes " << loader.getNumMeshes();
@@ -99,40 +131,46 @@ void RobotKinematicModel::setup(RobotType type){
             }
         }
 
-        joints[0].position.set(0, 0, 0);
-        joints[1].position.set(0, -0.072238, 0.083204);
-        joints[2].position.set(0, -0.077537,0.51141);
-        joints[3].position.set(0, -0.070608, 0.903192);
-        joints[4].position.set(0, -0.117242, 0.950973);
-        joints[5].position.set(0, -0.164751, 0.996802);
-        joints[6].position.set(0, -0.164751, 0.996802);
-    }
+        // xarm data from here: /Volumes/Work/code/ROS/relaxed_ik_catkin/src/relaxed_ik/src/RelaxedIK/urdfs/xarm7.urdf
 
+        joints[0].position.set(0, 0, 0.267);
+        joints[1].position.set(0, 0, 0);
+        joints[2].position.set(0, -0.293, 0.0);
+        joints[3].position.set(0.0525, 0, 0);
+        joints[4].position.set(0.0775, -0.3425, 0);
+        joints[5].position.set(0, 0, 0);
+        joints[6].position.set(0.076, 0.097, 0);
 
-    tool.position.set(joints[5].position + ofVec3f(0,-0.0308,0)); // flange position
+        tool.position.set(joints[5].position + ofVec3f(0,-0.0308,0)); // flange position
     
-    for(int i = 1; i <joints.size(); i++){
-        joints[i].offset =joints[i].position-joints[i-1].position;
+        for(int i = 1; i <joints.size(); i++){
+             joints[i].offset =joints[i].position-joints[i-1].position;
+            
+        }
+        tool.offset = joints[5].offset;
         
-    }
-    tool.offset = joints[5].offset;
-    
-    // Setup the joint axes
-    joints[0].axis.set(0, 0, 1);
-    joints[1].axis.set(0, -1, 0);
-    joints[2].axis.set(0, -1, 0);
-    joints[3].axis.set(0, -1, 0);
-    joints[4].axis.set(0, 0, 1);
-    joints[5].axis.set(0, 1, 0);
+        // Setup the joint axes
+        joints[0].axis.set(0, 0, 1);
+        joints[1].axis.set(0, 0, 1);
+        joints[2].axis.set(0, 0, 1);
+        joints[3].axis.set(0, 0, 1);
+        joints[4].axis.set(0, 0, 1);
+        joints[5].axis.set(0, 0, 1);
+        joints[6].axis.set(0, 0, 1);
 
-    tool.axis.set(joints[5].axis);
+        tool.axis.set(joints[5].axis);
+
+        joints[0].rotation.makeRotate(0,joints[0].axis);
+        joints[1].rotation.makeRotate(-90,joints[1].axis);
+        joints[2].rotation.makeRotate(90,joints[2].axis);
+        joints[3].rotation.makeRotate(90,joints[3].axis);
+        joints[4].rotation.makeRotate(90,joints[4].axis);
+        joints[5].rotation.makeRotate(90,joints[5].axis);
+        joints[6].rotation.makeRotate(-90,joints[6].axis);
+
+    }
+
     
-    joints[0].rotation.makeRotate(0,joints[0].axis);
-    joints[1].rotation.makeRotate(-90,joints[1].axis);
-    joints[2].rotation.makeRotate(0,joints[2].axis);
-    joints[3].rotation.makeRotate(-90,joints[3].axis);
-    joints[4].rotation.makeRotate(0,joints[4].axis);
-    joints[5].rotation.makeRotate(0,joints[5].axis);
     
     // Rig Joints
     nodes[0].setPosition(joints[0].position);
