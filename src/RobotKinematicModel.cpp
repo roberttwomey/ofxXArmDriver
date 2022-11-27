@@ -68,6 +68,44 @@ void RobotKinematicModel::setup(RobotType type){
         joints[3].position.set(0, -.1094, 1.3116);          //(-1.3116,0.000,-.1094);   //
         joints[4].position.set(0, -0.16395, 1.3733);       //(-1.3733,0.000,-.1639);   //
         joints[5].position.set(0, -0.22535, 1.4273);        //(-1.4273,0.000,-.2561);   //
+
+    } else if (type == RobotType::XARM7) {
+
+        // xarm7 7-DOF
+        joints.resize(7);
+        nodes.resize(7);
+        vector<Joint> foojoints;
+        foojoints.resize(7);
+
+        ofLog() << "Setting up XARM7";
+
+        if(loader.loadModel(ofToDataPath("models/xarm7/link_base.dae"))){
+            // ofLog() << "numMeshes " << loader.getNumMeshes();
+            for(int i = 0; i < loader.getNumMeshes(); i++){
+                meshs.push_back(loader.getMesh(i));
+            }
+        }else{
+            ofLogFatalError()<<"PLEASE PLACE THE 3D FILES OF THE UR ARM IN data/models/xarm7/";
+        }
+        
+        for(int j=1; j<8; j++) {        
+            if(loader.loadModel(ofToDataPath("models/xarm7/link"+ofToString(j)+".dae"))){
+                // ofLog() << "numMeshes " << loader.getNumMeshes();
+                for(int i = 0; i < loader.getNumMeshes(); i++){
+                    meshs.push_back(loader.getMesh(i));
+                }
+            }else{
+                ofLogFatalError()<<"PLEASE PLACE THE 3D FILES OF THE UR ARM IN data/models/xarm7/";
+            }
+        }
+
+        joints[0].position.set(0, 0, 0);
+        joints[1].position.set(0, -0.072238, 0.083204);
+        joints[2].position.set(0, -0.077537,0.51141);
+        joints[3].position.set(0, -0.070608, 0.903192);
+        joints[4].position.set(0, -0.117242, 0.950973);
+        joints[5].position.set(0, -0.164751, 0.996802);
+        joints[6].position.set(0, -0.164751, 0.996802);
     }
 
 

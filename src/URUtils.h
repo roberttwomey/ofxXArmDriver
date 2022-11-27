@@ -29,5 +29,6 @@ inline ofVec3f toMM(ofVec3f v){
 enum RobotType{
     UR3,
     UR5,
-    UR10
+    UR10, 
+    XARM7
 };
