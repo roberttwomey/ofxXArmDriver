@@ -131,10 +131,10 @@ void RobotKinematicModel::setup(RobotType type){
     if (type == RobotType::XARM7) {
 
         // xarm7 7-DOF
-        joints.resize(8);
-        nodes.resize(8);
+        joints.resize(7);
+        nodes.resize(7);
         vector<Joint> foojoints;
-        foojoints.resize(8);
+        foojoints.resize(7);
 
         ofLog() << "Setting up XARM7";
 
@@ -175,24 +175,19 @@ void RobotKinematicModel::setup(RobotType type){
         }
 
         // xarm data from here: /Volumes/Work/code/ROS/relaxed_ik_catkin/src/relaxed_ik/src/RelaxedIK/urdfs/xarm7.urdf
-
-        float scale = 1.0;//0.5;
         
-        joints[0].position.set(0, 0, 0);//0.0267);//0.267*scale);
-        joints[1].position.set(0, 0, 0.267);//0.0267+0.01122);
-        joints[2].position.set(0, 0, 0.267);
-        joints[3].position.set(0, 0, 0.267+0.293);
-        joints[4].position.set(0.0525, 0, 0.267+0.293);
+        // joints[0].position.set(0, 0, 0);
+        joints[0].position.set(0, 0, 0.267);
+        joints[1].position.set(0, 0, 0.267);
+        joints[2].position.set(0, 0, 0.267+0.293);
+        joints[3].position.set(0.0525, 0, 0.267+0.293);
+        joints[4].position.set(0.0525+0.0775, 0, 0.267+0.293-0.3425);
         joints[5].position.set(0.0525+0.0775, 0, 0.267+0.293-0.3425);
-        joints[6].position.set(0.0525+0.0775, 0, 0.267+0.293-0.3425);
-        joints[7].position.set(0.0525+0.0775+0.076, 0, 0.267+0.293-0.3425-0.097);
+        joints[6].position.set(0.0525+0.0775+0.076, 0, 0.267+0.293-0.3425-0.097);
 
         tool.position.set(joints[5].position + ofVec3f(0,-0.0308,0)); // flange position
     
-        joints[0].offset.set(0, 0, 0);
-        // joints[1].offset.set(0, 0, 0.160089/2+0.1548/2);
-
-        // joints[0].offset.set(0, 0, 0.267);
+        joints[0].offset.set(0, 0, 0.267);
 
         for(int i = 1; i <joints.size(); i++){
              joints[i].offset =joints[i].position-joints[i-1].position;
@@ -202,28 +197,25 @@ void RobotKinematicModel::setup(RobotType type){
         tool.offset = joints[5].offset;
         
         // Setup the joint axes
+        // joints[0].axis.set(0, 0, 1);
         joints[0].axis.set(0, 0, 1);
-        joints[1].axis.set(0, 0, 1);
-        joints[2].axis.set(1, 0, 0);
-        joints[3].axis.set(0, 0, 1);
+        joints[1].axis.set(1, 0, 0);
+        joints[2].axis.set(0, 0, 1);
+        joints[3].axis.set(1, 0, 0);
         joints[4].axis.set(1, 0, 0);
         joints[5].axis.set(1, 0, 0);
         joints[6].axis.set(1, 0, 0);
-        joints[5].axis.set(1, 0, 0);
         // tool.axis.set(joints[5].axis);
 
+        // joints[0].rotation.makeRotate(0,joints[0].axis);
         joints[0].rotation.makeRotate(0,joints[0].axis);
-        joints[1].rotation.makeRotate(0,joints[1].axis);
-        joints[2].rotation.makeRotate(-90,joints[2].axis);
-        joints[3].rotation.makeRotate(0,joints[3].axis);
-        joints[4].rotation.makeRotate(90,joints[4].axis);
-        joints[5].rotation.makeRotate(-180,joints[5].axis);
-        joints[6].rotation.makeRotate(-90,joints[6].axis);
-        joints[7].rotation.makeRotate(-180,joints[6].axis);
-
+        joints[1].rotation.makeRotate(-90,joints[1].axis);
+        joints[2].rotation.makeRotate(0,joints[2].axis);
+        joints[3].rotation.makeRotate(90,joints[3].axis);
+        joints[4].rotation.makeRotate(-180,joints[4].axis);
+        joints[5].rotation.makeRotate(-90,joints[5].axis);
+        joints[6].rotation.makeRotate(-180,joints[6].axis);
     }
-
-    
     
     // Rig Joints
     nodes[0].setPosition(joints[0].position);
@@ -345,10 +337,13 @@ void RobotKinematicModel::draw(ofFloatColor color, bool bDrawDebug){
                 {
                     float angle;
                     ofVec3f axis;
-                    q = joints[i].rotation;
-                    q.getRotate(angle, axis);
-                    ofTranslate(joints[i].offset*1000);
-                    gmat.translate(joints[i].offset*1000 );
+                    
+                    if (i>0) {
+                        q = joints[i-1].rotation;
+                        q.getRotate(angle, axis);
+                        ofTranslate(joints[i-1].offset*1000);
+                        gmat.translate(joints[i-1].offset*1000 );
+                    }
 
                     if(bDrawDebug) {
                         ofDrawAxis(30);
@@ -382,7 +377,7 @@ void RobotKinematicModel::draw(ofFloatColor color, bool bDrawDebug){
 
                     ofPushMatrix();
                     {
-                        ofRotateDeg(angle, axis.x, axis.y, axis.z);
+                        if(i>0) ofRotateDeg(angle, axis.x, axis.y, axis.z);
                         ofScale(100, 100, 100);    
                         meshs[i].draw();
                     } 
