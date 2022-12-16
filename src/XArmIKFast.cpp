@@ -1,6 +1,7 @@
 #include "XArmIKFast.h"
 // Copyright (c) 2016, Daniel Moore, Madeline Gannon, and The Frank-Ratchye STUDIO for Creative Inquiry All rights reserved.
 //
+
 XArmIKFast::XArmIKFast(RobotType type){
     kinematics = XArmKinematics(type);
 }
@@ -119,7 +120,7 @@ int argMin(std::vector<double> vec)
 
 
 
-intXArmIKFast::selectSolution(vector<vector<double> > & inversePosition, vector<double> currentQ, vector<double> weight)
+int XArmIKFast::selectSolution(vector<vector<double> > & inversePosition, vector<double> currentQ, vector<double> weight)
 {
     int selectedSolution = 0;
     
@@ -188,7 +189,7 @@ intXArmIKFast::selectSolution(vector<vector<double> > & inversePosition, vector<
 }
 
 
-vector<vector<double> >XArmIKFast::inverseKinematics(double o, double t, double th, double f, double fi, double s)
+vector<vector<double>> XArmIKFast::inverseKinematics(double o, double t, double th, double f, double fi, double s)
 {
     double q[6] = {o, t, th, f, fi, s};
     double* T = new double[16];
@@ -209,7 +210,7 @@ vector<vector<double> >XArmIKFast::inverseKinematics(double o, double t, double 
 }
 
 
-vector<vector<double> >XArmIKFast::inverseKinematics(vector<double> input)
+vector<vector<double>> XArmIKFast::inverseKinematics(vector<double> input)
 {
     if(input.size() == 6){
         return inverseKinematics(input[0], input[1], input[2], input[3], input[4], input[5]);
@@ -217,7 +218,7 @@ vector<vector<double> >XArmIKFast::inverseKinematics(vector<double> input)
     return vector<vector<double>>();
 }
 
-vector<vector<double> >XArmIKFast::inverseKinematics(Joint pose){
+vector<vector<double>> XArmIKFast::inverseKinematics(Joint pose){
     ofMatrix4x4 matPose;
     ofMatrix4x4 matT, matR;
     matT.makeTranslationMatrix(pose.position);
@@ -227,7 +228,7 @@ vector<vector<double> >XArmIKFast::inverseKinematics(Joint pose){
     
 }
 
-vector<vector<double> >XArmIKFast::inverseKinematics(ofMatrix4x4 pose)
+vector<vector<double>> XArmIKFast::inverseKinematics(ofMatrix4x4 pose)
 {
     double q_sols[8*6];
     double* T = new double[16];
@@ -247,13 +248,13 @@ vector<vector<double> >XArmIKFast::inverseKinematics(ofMatrix4x4 pose)
     return sols;
 }
 
-ofMatrix4x4XArmIKFast::forwardKinematics(vector<double> pose)
+ofMatrix4x4 XArmIKFast::forwardKinematics(vector<double> pose)
 {
     currentPosition = pose;
     return toOF(forwardKinematics(pose[0], pose[1], pose[2], pose[3], pose[4], pose[5]));
 }
 
-double*XArmIKFast::forwardKinematics(double o, double t, double th, double f, double fi, double s)
+double* XArmIKFast::forwardKinematics(double o, double t, double th, double f, double fi, double s)
 {
     double q[6] = {o, t, th, f, fi, s};
     double* T1 = new double[16];

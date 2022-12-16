@@ -10,7 +10,7 @@
 #include "URUtils.h"
 // Copyright (c) 2016, Daniel Moore, Madeline Gannon, and The Frank-Ratchye STUDIO for Creative Inquiry All rights reserved.
 //
-classXArmIKFast{
+class XArmIKFast{
 public:
    XArmIKFast();
    XArmIKFast(RobotType type);
@@ -22,7 +22,7 @@ public:
     vector<vector<double> > inverseKinematics(Joint pose);
     vector<vector<double> > inverseKinematics(ofMatrix4x4 pose);
     vector<vector<double> > inverseKinematics(vector<double> input);
-    vector<vector<double> >  inverseKinematics(double o, double t, double th, double f, double fi, double s);
+    vector<vector<double> > inverseKinematics(double o, double t, double th, double f, double fi, double s);
     
     
     vector<double> currentPosition;
