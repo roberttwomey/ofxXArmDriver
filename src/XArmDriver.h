@@ -1,5 +1,5 @@
 //
-//  ofxURDriver.hpp
+//  ofxXArmDriver.hpp
 //  urModernDriverTest
 //
 //  Created by dantheman on 2/20/16.
@@ -14,10 +14,10 @@
 #include "RobotKinematicModel.h"
 #include "ofxTiming.h"
 
-class ofxURDriver : public ofThread{
+class ofxXArmDriver : public ofThread{
 public:
-    ofxURDriver();
-    ~ofxURDriver();
+    ofxXArmDriver();
+    ~ofxXArmDriver();
     void setAllowReconnect(bool bDoReconnect);
     void setup(string ipAddress, double minPayload = 0.0, double maxPayload = 1.0);
     void start();
@@ -48,7 +48,7 @@ public:
     
     Joint getToolPose();
     // Robot Arm
-    UrDriver* robot;
+    XArmDriver* robot;
     condition_variable rt_msg_cond_;
     condition_variable msg_cond_;
     bool has_goal_;

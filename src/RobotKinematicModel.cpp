@@ -130,19 +130,19 @@ void RobotKinematicModel::setup(RobotType type){
 
     if (type == RobotType::XARM7) {
 
-        // xarm7 7-DOF
+        // XArm7 7-DOF
         joints.resize(7);
         nodes.resize(7);
-        vector<Joint> foojoints;
-        foojoints.resize(7);
+        // vector<Joint> foojoints;
+        // foojoints.resize(7);
 
-        ofLog() << "Setting up XARM7";
+        ofLog() << "Setting up XArm7";
 
-        // 3d files are here /Volumes/Work/Projects/on-display/solids/xarm_of
+        // 3d files are here /Volumes/Work/Projects/on-display/solids/XArm_of
 
         float scalef = 10.0;
 
-        if(loader.loadModel(ofToDataPath("models/xarm7/link_base.obj"))){
+        if(loader.loadModel(ofToDataPath("models/XArm7/link_base.obj"))){
             // ofLog() << "numMeshes " << loader.getNumMeshes();
             for(int i = 0; i < loader.getNumMeshes(); i++){
                 ofMesh thismesh = loader.getMesh(i);
@@ -152,11 +152,11 @@ void RobotKinematicModel::setup(RobotType type){
                 // meshs.push_back(loader.getMesh(i));
             }
         }else{
-            ofLogFatalError()<<"PLEASE PLACE THE 3D FILES OF THE UR ARM IN data/models/xarm7/";
+            ofLogFatalError()<<"PLEASE PLACE THE 3D FILES OF THE UR ARM IN data/models/XArm7/";
         }
         
         for(int j=1; j<8; j++) {        
-            if(loader.loadModel(ofToDataPath("models/xarm7/link"+ofToString(j)+".obj"))){
+            if(loader.loadModel(ofToDataPath("models/XArm7/link"+ofToString(j)+".obj"))){
                 // ofLog() << "numMeshes " << loader.getNumMeshes();
                 for(int i = 0; i < loader.getNumMeshes(); i++){
                     ofMesh thismesh = loader.getMesh(i);
@@ -165,16 +165,12 @@ void RobotKinematicModel::setup(RobotType type){
                     meshs.push_back(thismesh);
                 }
             }else{
-                ofLogFatalError()<<"PLEASE PLACE THE 3D FILES OF THE UR ARM IN data/models/xarm7/";
+                ofLogFatalError()<<"PLEASE PLACE THE 3D FILES OF THE UR ARM IN data/models/XArm7/";
             }
         }
 
-        for(int i=0; i<8; i++) {
-            ofVec3f bounds = calcBoundingBox(meshs[i].getVertices());
-            ofLog() << "mesh " << ofToString(i) << ": " << bounds;
-        }
 
-        // xarm data from here: /Volumes/Work/code/ROS/relaxed_ik_catkin/src/relaxed_ik/src/RelaxedIK/urdfs/xarm7.urdf
+        // XArm data from here: /Volumes/Work/code/ROS/relaxed_ik_catkin/src/relaxed_ik/src/RelaxedIK/urdfs/XArm7.urdf
         
         // joints[0].position.set(0, 0, 0);
         joints[0].position.set(0, 0, 0.267);
@@ -185,7 +181,7 @@ void RobotKinematicModel::setup(RobotType type){
         joints[5].position.set(0.0525+0.0775, 0, 0.267+0.293-0.3425);
         joints[6].position.set(0.0525+0.0775+0.076, 0, 0.267+0.293-0.3425-0.097);
 
-        tool.position.set(joints[5].position + ofVec3f(0,-0.0308,0)); // flange position
+        tool.position.set(joints[6].position); // NEED SOME OFFSET + ofVec3f(0,-0.0308,0)); // flange position
     
         joints[0].offset.set(0, 0, 0.267);
 
@@ -194,7 +190,7 @@ void RobotKinematicModel::setup(RobotType type){
             
         }
 
-        tool.offset = joints[5].offset;
+        tool.offset = joints[6].offset;
         
         // Setup the joint axes
         // joints[0].axis.set(0, 0, 1);
@@ -205,34 +201,61 @@ void RobotKinematicModel::setup(RobotType type){
         joints[4].axis.set(1, 0, 0);
         joints[5].axis.set(1, 0, 0);
         joints[6].axis.set(1, 0, 0);
-        // tool.axis.set(joints[5].axis);
+        tool.axis.set(joints[6].axis);
 
         // joints[0].rotation.makeRotate(0,joints[0].axis);
-        joints[0].rotation.makeRotate(0,joints[0].axis);
-        joints[1].rotation.makeRotate(-90,joints[1].axis);
-        joints[2].rotation.makeRotate(0,joints[2].axis);
-        joints[3].rotation.makeRotate(90,joints[3].axis);
-        joints[4].rotation.makeRotate(-180,joints[4].axis);
-        joints[5].rotation.makeRotate(-90,joints[5].axis);
-        joints[6].rotation.makeRotate(-180,joints[6].axis);
+        joints[0].rotation.makeRotate(0, joints[0].axis);
+        joints[1].rotation.makeRotate(-90, joints[1].axis);
+        joints[2].rotation.makeRotate(0, joints[2].axis);
+        joints[3].rotation.makeRotate(90, joints[3].axis);
+        joints[4].rotation.makeRotate(-180, joints[4].axis);
+        joints[5].rotation.makeRotate(-90, joints[5].axis);
+        joints[6].rotation.makeRotate(-180, joints[6].axis);
     }
     
     // Rig Joints
-    nodes[0].setPosition(joints[0].position);
-    nodes[0].setOrientation(joints[0].rotation);
-    for(int i = 1; i <nodes.size(); i++){
-        nodes[i].setParent(nodes[i-1]);
-        nodes[i].setPosition(joints[i].offset*1000);
-        nodes[i].setOrientation(joints[i].rotation);
-    }
+    nodes[0].setPosition(0, 0, 0.267*1000);
+    nodes[0].setOrientation(ofQuaternion(0, ofVec3f(1, 0, 0)));
+
+    nodes[1].setParent(nodes[0]);
+    nodes[1].setPosition(0, 0, 0);
+    nodes[1].setOrientation(ofQuaternion(-90, ofVec3f(1,0, 0)));
     
+    nodes[2].setParent(nodes[1]);
+    nodes[2].setPosition(0, -0.293*1000, 0);
+    nodes[2].setOrientation(ofQuaternion(90, ofVec3f(1, 0, 0)));
+    
+    nodes[3].setParent(nodes[2]);
+    nodes[3].setPosition(0.0525*1000, 0, 0);
+    nodes[3].setOrientation(ofQuaternion(90, ofVec3f(1, 0, 0))); // GOOD TO HERE
+    
+    nodes[4].setParent(nodes[3]);
+    nodes[4].setPosition(0.0775*1000, -0.3425*1000, 0);
+    nodes[4].setOrientation(ofQuaternion(90, ofVec3f(1, 0, 0)));
+    
+    nodes[5].setParent(nodes[4]);
+    nodes[5].setPosition(0, 0, 0);
+    nodes[5].setOrientation(ofQuaternion(-90, ofVec3f(1, 0, 0)));
+    
+    nodes[6].setParent(nodes[5]);
+    nodes[6].setPosition(0.076*1000, -0.097*1000, 0);
+    nodes[6].setOrientation(ofQuaternion(0, ofVec3f(1, 0, 0)));
+
+    // should really set the joints in relation to the nodes
+
+    // for(int i = 1; i <nodes.size(); i++){
+    //     nodes[i].setParent(nodes[i-1]);
+    //     nodes[i].setPosition(joints[i].offset*1000);
+    //     nodes[i].setOrientation(joints[i].rotation);
+    //     // nodes[i].setScale(10);
+    // }
     
     // Set Tool Center Point Node
-    tcpNode.setParent(nodes[5]);
-    tcpNode.setPosition(ofVec3f(0.0, -0.0308, 0.0)*1000);
+    tcpNode.setParent(nodes[6]);
+    tcpNode.setPosition(ofVec3f(0.0, -0.028, 0.0)*1000);
     
     // Set Tool Rotations
-    tool.rotation =joints[5].rotation;
+    tool.rotation =joints[6].rotation;
     
     shader.load("shaders/model");
     
@@ -244,9 +267,8 @@ void RobotKinematicModel::setup(RobotType type){
 }
 
 ofQuaternion RobotKinematicModel::getToolPointQuaternion(){
-    return toOf(nodes[5].getGlobalTransformMatrix()).getRotate();
+    return toOf(nodes[6].getGlobalTransformMatrix()).getRotate();
 }
-
 
 ofNode RobotKinematicModel::getTool(){
     return tcpNode;
@@ -257,25 +279,39 @@ void RobotKinematicModel::setToolOffset(ofVec3f localOffset){
 }
 
 void RobotKinematicModel::setAngles( vector<double> aTargetRadians ){
+
     for(int i = 0; i < joints.size(); i++){
-        if(i == 1 || i == 3){
-            joints[i].rotation.makeRotate(ofRadToDeg(aTargetRadians[i])+90,joints[i].axis);
-        }else{
-            joints[i].rotation.makeRotate(ofRadToDeg(aTargetRadians[i]),joints[i].axis);
-        }
+        joints[i].rotation.makeRotate(ofRadToDeg(aTargetRadians[i]),joints[i].axis);
         nodes[i].setOrientation(joints[i].rotation);
     }
+
+    // --- UR STUFF ---
+    // for(int i = 0; i < joints.size(); i++){
+    //     if(i == 1 || i == 3){
+    //         joints[i].rotation.makeRotate(ofRadToDeg(aTargetRadians[i])+90,joints[i].axis);
+    //     }else{
+    //         joints[i].rotation.makeRotate(ofRadToDeg(aTargetRadians[i]),joints[i].axis);
+    //     }
+    //     nodes[i].setOrientation(joints[i].rotation);
+    // }
 }
 
 void RobotKinematicModel::setPose(vector<double> pose){
+
     for(int i = 0; i < pose.size(); i++){
-        if(i == 1 || i == 3){
-            joints[i].rotation.makeRotate(ofRadToDeg(pose[i])+90,joints[i].axis);
-        }else{
-            joints[i].rotation.makeRotate(ofRadToDeg(pose[i]),joints[i].axis);
-        }
-         nodes[i].setOrientation(joints[i].rotation);
+        joints[i].rotation.makeRotate(ofRadToDeg(pose[i]),joints[i].axis);
+        nodes[i].setOrientation(joints[i].rotation);
     }
+
+    // --- UR STUFF --- 
+    // for(int i = 0; i < pose.size(); i++){
+    //     if(i == 1 || i == 3){
+    //         joints[i].rotation.makeRotate(ofRadToDeg(pose[i])+90,joints[i].axis);
+    //     }else{
+    //         joints[i].rotation.makeRotate(ofRadToDeg(pose[i]),joints[i].axis);
+    //     }
+    //     nodes[i].setOrientation(joints[i].rotation);
+    // }
 }
 
 void RobotKinematicModel::setEndEffector(string filename){
@@ -299,14 +335,17 @@ void RobotKinematicModel::clearEndEffector(){
 void RobotKinematicModel::setToolMesh(ofMesh mesh){
     toolMesh = mesh;
 }
+
 void RobotKinematicModel::update(){
 
 }
+
 void RobotKinematicModel::draw(ofFloatColor color, bool bDrawDebug){
     ofPushMatrix();
     ofPushStyle();
     ofEnableDepthTest();
     ofSetColor(255, 255, 255);
+    
     if(bDrawDebug) {
         ofPushStyle(); {
             ofDrawAxis(1000);
@@ -349,7 +388,16 @@ void RobotKinematicModel::draw(ofFloatColor color, bool bDrawDebug){
                         ofDrawAxis(30);
                     }
 
-                    ofMatrix4x4 tmat;
+                    // ofMatrix4x4 tmat;
+
+                    ofPushMatrix();
+                    {
+                        if(i>0) ofRotateDeg(angle, axis.x, axis.y, axis.z);
+                        ofScale(100, 100, 100);    
+                        meshs[i].draw();
+                    } 
+                    ofPopMatrix();
+
 
                     // TODO: check this out
                     // if(i >= 3){
@@ -374,15 +422,6 @@ void RobotKinematicModel::draw(ofFloatColor color, bool bDrawDebug){
                     //     } 
                     //     ofPopMatrix();
                     // }
-
-                    ofPushMatrix();
-                    {
-                        if(i>0) ofRotateDeg(angle, axis.x, axis.y, axis.z);
-                        ofScale(100, 100, 100);    
-                        meshs[i].draw();
-                    } 
-                    ofPopMatrix();
-
                     // if (i==6){
                     //     // include flange offset
                     //     // ofTranslate(0, -0.0308 * 1000, 0);
@@ -406,9 +445,9 @@ void RobotKinematicModel::draw(ofFloatColor color, bool bDrawDebug){
         if (bDrawDebug) {
             ofPushMatrix();
             {
-                //            ofRotate(180, 0, 0, 1);
+//            ofRotate(180, 0, 0, 1);
                 for(int i = 0; i < nodes.size(); i++){
-                    nodes[i].draw();
+                    if(i!=0) nodes[i].draw();
                 }
                 tcpNode.draw();
             }

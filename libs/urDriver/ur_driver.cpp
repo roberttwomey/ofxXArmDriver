@@ -18,7 +18,7 @@
 
 #include "ur_driver.h"
 
-UrDriver::UrDriver(std::condition_variable& rt_msg_cond,
+XArmDriver::XArmDriver(std::condition_variable& rt_msg_cond,
                    std::condition_variable& msg_cond, std::string host,
                    unsigned int reverse_port, double servoj_time,
                    unsigned int safety_count_max, double max_time_step, double min_payload,
@@ -58,7 +58,7 @@ REVERSE_PORT_(reverse_port), maximum_time_step_(max_time_step), minimum_payload_
     listen(incoming_sockfd_, 5);
 }
 
-std::vector<double> UrDriver::interp_cubic(double t, double T,
+std::vector<double> XArmDriver::interp_cubic(double t, double T,
                                            std::vector<double> p0_pos, std::vector<double> p1_pos,
                                            std::vector<double> p0_vel, std::vector<double> p1_vel) {
     /*Returns positions of the joints at time 't' */
@@ -75,14 +75,14 @@ std::vector<double> UrDriver::interp_cubic(double t, double T,
     return positions;
 }
 
-bool UrDriver::doTraj(std::vector<double> inp_timestamps,
+bool XArmDriver::doTraj(std::vector<double> inp_timestamps,
                       std::vector<std::vector<double> > inp_positions,
                       std::vector<std::vector<double> > inp_velocities) {
     std::chrono::high_resolution_clock::time_point t0, t;
     std::vector<double> positions;
     unsigned int j;
     
-    if (!UrDriver::uploadProg()) {
+    if (!XArmDriver::uploadProg()) {
         return false;
     }
     executing_traj_ = true;
@@ -97,12 +97,12 @@ bool UrDriver::doTraj(std::vector<double> inp_timestamps,
                                                                             t - t0).count() && j < inp_timestamps.size() - 1) {
                    j += 1;
                }
-        positions = UrDriver::interp_cubic(
+        positions = XArmDriver::interp_cubic(
                                            std::chrono::duration_cast<std::chrono::duration<double>>(
                                                                                                      t - t0).count() - inp_timestamps[j - 1],
                                            inp_timestamps[j] - inp_timestamps[j - 1], inp_positions[j - 1],
                                            inp_positions[j], inp_velocities[j - 1], inp_velocities[j]);
-        UrDriver::servoj(positions);
+        XArmDriver::servoj(positions);
         
         // oversample with 4 * sample_time
         std::this_thread::sleep_for(
@@ -111,14 +111,14 @@ bool UrDriver::doTraj(std::vector<double> inp_timestamps,
     }
     executing_traj_ = false;
     //Signal robot to stop driverProg()
-    UrDriver::closeServo(positions);
+    XArmDriver::closeServo(positions);
     return true;
 }
 
-void UrDriver::servoj(std::vector<double> positions, int keepalive) {
+void XArmDriver::servoj(std::vector<double> positions, int keepalive) {
     if (!reverse_connected_) {
         print_error(
-                    "UrDriver::servoj called without a reverse connection present. Keepalive: "
+                    "XArmDriver::servoj called without a reverse connection present. Keepalive: "
                     + std::to_string(keepalive));
         return;
     }
@@ -140,12 +140,12 @@ void UrDriver::servoj(std::vector<double> positions, int keepalive) {
     bytes_written = write(new_sockfd_, buf, 28);
 }
 
-void UrDriver::stopTraj() {
+void XArmDriver::stopTraj() {
     executing_traj_ = false;
     rt_interface_->addCommandToQueue("stopj(10)\n");
 }
 
-bool UrDriver::uploadProg() {
+bool XArmDriver::uploadProg() {
 	std::string cmd_str;
 	char buf[128];
 	cmd_str = "def driverProg():\n";
@@ -220,14 +220,14 @@ bool UrDriver::uploadProg() {
 
 	rt_interface_->addCommandToQueue(cmd_str);
     
-    cout << " UrDriver::uploadProg complete " << endl;
+    cout << " XArmDriver::uploadProg complete " << endl;
 
     //HAD TO DISABLE OPENSERVO AS IT DOESNT RETURN
-	return true;//UrDriver::openServo();
+	return true;//XArmDriver::openServo();
 
 }
 
-bool UrDriver::openServo() {
+bool XArmDriver::openServo() {
     struct sockaddr_in cli_addr;
     socklen_t clilen;
     clilen = sizeof(cli_addr);
@@ -240,17 +240,17 @@ bool UrDriver::openServo() {
     reverse_connected_ = true;
     return true;
 }
-void UrDriver::closeServo(std::vector<double> positions) {
+void XArmDriver::closeServo(std::vector<double> positions) {
     if (positions.size() != 6)
-        UrDriver::servoj(rt_interface_->robot_state_->getQActual(), 0);
+        XArmDriver::servoj(rt_interface_->robot_state_->getQActual(), 0);
     else
-        UrDriver::servoj(positions, 0);
+        XArmDriver::servoj(positions, 0);
     
     reverse_connected_ = false;
     close(new_sockfd_);
 }
 
-bool UrDriver::start() {
+bool XArmDriver::start() {
     if (!sec_interface_->start())
         return false;
     firmware_version_ = sec_interface_->robot_state_->getVersion();
@@ -265,21 +265,21 @@ bool UrDriver::start() {
     
 }
 
-void UrDriver::halt() {
+void XArmDriver::halt() {
     if (executing_traj_) {
-        UrDriver::stopTraj();
+        XArmDriver::stopTraj();
     }
     sec_interface_->halt();
     rt_interface_->halt();
     close(incoming_sockfd_);
 }
 
-void UrDriver::setSpeed(double q0, double q1, double q2, double q3, double q4,
+void XArmDriver::setSpeed(double q0, double q1, double q2, double q3, double q4,
                         double q5, double acc) {
     rt_interface_->setSpeed(q0, q1, q2, q3, q4, q5, acc);
 }
 
-void UrDriver::setPosition(double q0, double q1, double q2, double q3, double q4,
+void XArmDriver::setPosition(double q0, double q1, double q2, double q3, double q4,
 		double q5) {
     
     //THEO this works!
@@ -287,35 +287,35 @@ void UrDriver::setPosition(double q0, double q1, double q2, double q3, double q4
 }
 
 // DAN added
-void UrDriver::setTeachModeDisabled(){
+void XArmDriver::setTeachModeDisabled(){
     rt_interface_->setTeachModeDisabled();
 }
-void UrDriver::setTeachModeEnabled(){
+void XArmDriver::setTeachModeEnabled(){
      rt_interface_->setTeachModeEnabled();
 }
 
-std::vector<std::string> UrDriver::getJointNames() {
+std::vector<std::string> XArmDriver::getJointNames() {
     return joint_names_;
 }
 
-void UrDriver::setJointNames(std::vector<std::string> jn) {
+void XArmDriver::setJointNames(std::vector<std::string> jn) {
     joint_names_ = jn;
 }
 
-void UrDriver::setToolVoltage(unsigned int v) {
+void XArmDriver::setToolVoltage(unsigned int v) {
     char buf[256];
     sprintf(buf, "sec setOut():\n\tset_tool_voltage(%d)\nend\n", v);
     rt_interface_->addCommandToQueue(buf);
     print_debug(buf);
 }
-void UrDriver::setFlag(unsigned int n, bool b) {
+void XArmDriver::setFlag(unsigned int n, bool b) {
     char buf[256];
     sprintf(buf, "sec setOut():\n\tset_flag(%d, %s)\nend\n", n,
             b ? "True" : "False");
     rt_interface_->addCommandToQueue(buf);
     print_debug(buf);
 }
-void UrDriver::setDigitalOut(unsigned int n, bool b) {
+void XArmDriver::setDigitalOut(unsigned int n, bool b) {
     char buf[256];
     if (firmware_version_ < 2) {
         sprintf(buf, "sec setOut():\n\tset_digital_out(%d, %s)\nend\n", n,
@@ -337,7 +337,7 @@ void UrDriver::setDigitalOut(unsigned int n, bool b) {
     print_debug(buf);
     
 }
-void UrDriver::setAnalogOut(unsigned int n, double f) {
+void XArmDriver::setAnalogOut(unsigned int n, double f) {
     char buf[256];
     if (firmware_version_ < 2) {
         sprintf(buf, "sec setOut():\n\tset_analog_out(%d, %1.4f)\nend\n", n, f);
@@ -349,7 +349,7 @@ void UrDriver::setAnalogOut(unsigned int n, double f) {
     print_debug(buf);
 }
 
-bool UrDriver::setPayload(double m) {
+bool XArmDriver::setPayload(double m) {
     if ((m < maximum_payload_) && (m > minimum_payload_)) {
         char buf[256];
         sprintf(buf, "sec setOut():\n\tset_payload(%1.3f)\nend\n", m);
@@ -360,7 +360,7 @@ bool UrDriver::setPayload(double m) {
         return false;
 }
 
-void UrDriver::setMinPayload(double m) {
+void XArmDriver::setMinPayload(double m) {
     if (m > 0) {
         minimum_payload_ = m;
     } else {
@@ -368,17 +368,17 @@ void UrDriver::setMinPayload(double m) {
     }
     
 }
-void UrDriver::setMaxPayload(double m) {
+void XArmDriver::setMaxPayload(double m) {
     maximum_payload_ = m;
 }
-void UrDriver::setServojTime(double t) {
+void XArmDriver::setServojTime(double t) {
     if (t > 0.008) {
         servoj_time_ = t;
     } else {
         servoj_time_ = 0.008;
     }
 }
-void UrDriver::setServojLookahead(double t){
+void XArmDriver::setServojLookahead(double t){
     if (t > 0.03) {
         if (t < 0.2) {
             servoj_lookahead_time_ = t;
@@ -389,7 +389,7 @@ void UrDriver::setServojLookahead(double t){
         servoj_lookahead_time_ = 0.03;
     }
 }
-void UrDriver::setServojGain(double g){
+void XArmDriver::setServojGain(double g){
     if (g > 100) {
         if (g < 2000) {
             servoj_gain_ = g;

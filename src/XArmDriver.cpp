@@ -1,32 +1,34 @@
 //
-//  ofxURDriver.cpp
+//  ofxXArmDriver.cpp
 //  urModernDriverTest
 //
 //  Created by dantheman on 2/20/16.
 // Copyright (c) 2016, Daniel Moore, Madeline Gannon, and The Frank-Ratchye STUDIO for Creative Inquiry All rights reserved.
 //
 
-#include "URDriver.h"
+#include "XArmDriver.h"
 
-ofxURDriver::ofxURDriver(){
-    currentSpeed.assign(6, 0.0);
+#define NUM_DOF 7
+
+ofxXArmDriver::ofxXArmDriver(){    
+    currentSpeed.assign(NUM_DOF, 0.0);
     acceleration = 0.0;
     robot       = NULL;
     bStarted    =false;
 
     vector<double> foo;
-    foo.assign(6, 0.0);
+    foo.assign(NUM_DOF, 0.0);
     jointsRaw.setup(foo);
     toolPointRaw.setup(foo);
     jointsProcessed.setup(foo);
-    jointsRaw.getBack().assign(6, 0.0);
-    jointsProcessed.getBack().assign(6, 0.0);
-    toolPointRaw.getBack().assign(6, 0.0);
+    jointsRaw.getBack().assign(NUM_DOF, 0.0);
+    jointsProcessed.getBack().assign(NUM_DOF, 0.0);
+    toolPointRaw.getBack().assign(NUM_DOF, 0.0);
     numDeccelSteps = 120;
 
 }
 
-ofxURDriver::~ofxURDriver(){
+ofxXArmDriver::~ofxXArmDriver(){
     if(robot){
         disconnect();
         delete robot;
@@ -34,7 +36,7 @@ ofxURDriver::~ofxURDriver(){
     }
 }
 
-void ofxURDriver::stopThread(){
+void ofxXArmDriver::stopThread(){
     if(isConnected()){
         disconnect();
     }
@@ -42,7 +44,8 @@ void ofxURDriver::stopThread(){
         ofThread::stopThread();
     }
 }
-void ofxURDriver::toggleTeachMode(){
+
+void ofxXArmDriver::toggleTeachMode(){
     lock();
     if(bTeachModeEnabled){
         bTeachModeEnabled = false;
@@ -54,7 +57,7 @@ void ofxURDriver::toggleTeachMode(){
     unlock();
 }
 
-void ofxURDriver::setTeachMode(bool enabled){
+void ofxXArmDriver::setTeachMode(bool enabled){
     lock();
     if(enabled){
         bTeachModeEnabled = true;
@@ -66,14 +69,14 @@ void ofxURDriver::setTeachMode(bool enabled){
     unlock();
 }
 
-void ofxURDriver::setAllowReconnect(bool bDoReconnect){
+void ofxXArmDriver::setAllowReconnect(bool bDoReconnect){
     bTryReconnect = bDoReconnect;
 }
 
-void ofxURDriver::setup(string ipAddress, double minPayload, double maxPayload){
-    cout << "ofxURDriver :: setup : ipAddress: " << ipAddress << endl;
+void ofxXArmDriver::setup(string ipAddress, double minPayload, double maxPayload){
+    cout << "ofxXArmDriver :: setup : ipAddress: " << ipAddress << endl;
     if( ipAddress != "" && ipAddress.length() > 3 ) {
-        robot = new UrDriver(rt_msg_cond_,
+        robot = new XArmDriver(rt_msg_cond_,
                          msg_cond_, ipAddress);
     } else {
         ofLogError( "ipAddress parameter is empty. Not initializing robot." );
@@ -83,13 +86,14 @@ void ofxURDriver::setup(string ipAddress, double minPayload, double maxPayload){
 //    vector<string> foo = robot->getJointNames();
     std::string joint_prefix = "ur_";
     std::vector<std::string> joint_names;
-    joint_prefix = "ofxURDriver-";
-    joint_names.push_back(joint_prefix + "shoulder_pan_joint");
-    joint_names.push_back(joint_prefix + "shoulder_lift_joint");
-    joint_names.push_back(joint_prefix + "elbow_joint");
-    joint_names.push_back(joint_prefix + "wrist_1_joint");
-    joint_names.push_back(joint_prefix + "wrist_2_joint");
-    joint_names.push_back(joint_prefix + "wrist_3_joint");
+    joint_prefix = "ofxXArmDriver-";
+    joint_names.push_back(joint_prefix + "j1");
+    joint_names.push_back(joint_prefix + "j2");
+    joint_names.push_back(joint_prefix + "j3");
+    joint_names.push_back(joint_prefix + "j4");
+    joint_names.push_back(joint_prefix + "j5");
+    joint_names.push_back(joint_prefix + "j6");
+    joint_names.push_back(joint_prefix + "j7");
     if( robot ) {
         robot->setJointNames(joint_names);
     }
@@ -110,49 +114,51 @@ void ofxURDriver::setup(string ipAddress, double minPayload, double maxPayload){
     toolPointRaw.swapBack();
     bStarted = false;
 
-    // @TODO: This is all incorrect (now called in RobotKinematicModel)
-    joints.resize(6);
+    // // @TODO: This is all incorrect (now called in RobotKinematicModel)
+    // SET POSITIONS, AXES, and ROTATIONS in RobotKinematicModel
+
+    // joints.resize(6);
     
-    joints[0].position.set(0, 0, 0);
-    joints[1].position.set(0, -0.072238, 0.083204);
-    joints[2].position.set(0,-0.077537,0.51141);
-    joints[3].position.set(0, -0.070608, 0.903192);
-    joints[4].position.set(0, -0.117242, 0.950973);
-    joints[5].position.set(0, -0.164751, 0.996802);
-    tool.position.set(joints[5].position + ofVec3f(0,-0.135,0)); // tool tip position
+    // joints[0].position.set(0, 0, 0);
+    // joints[1].position.set(0, -0.072238, 0.083204);
+    // joints[2].position.set(0,-0.077537,0.51141);
+    // joints[3].position.set(0, -0.070608, 0.903192);
+    // joints[4].position.set(0, -0.117242, 0.950973);
+    // joints[5].position.set(0, -0.164751, 0.996802);
+    // tool.position.set(joints[5].position + ofVec3f(0,-0.135,0)); // tool tip position
     
-    for(int i = 1; i <joints.size(); i++){
-        joints[i].offset =joints[i].position-joints[i-1].position;
+    // for(int i = 1; i <joints.size(); i++){
+    //     joints[i].offset =joints[i].position-joints[i-1].position;
         
-    }
-    tool.offset =joints[5].offset;
+    // }
+    // tool.offset =joints[5].offset;
     
     
     
-    joints[0].axis.set(0, 0, 1);
-    joints[1].axis.set(0, -1, 0);
-    joints[2].axis.set(0, -1, 0);
-    joints[3].axis.set(0, -1, 0);
-    joints[4].axis.set(0, 0, 1);
-    joints[5].axis.set(0, 1, 0);
-    tool.axis.set(joints[5].axis);
+    // joints[0].axis.set(0, 0, 1);
+    // joints[1].axis.set(0, -1, 0);
+    // joints[2].axis.set(0, -1, 0);
+    // joints[3].axis.set(0, -1, 0);
+    // joints[4].axis.set(0, 0, 1);
+    // joints[5].axis.set(0, 1, 0);
+    // tool.axis.set(joints[5].axis);
     
-    joints[0].rotation.makeRotate(0,joints[0].axis);
-    joints[1].rotation.makeRotate(-90,joints[1].axis);
-    joints[2].rotation.makeRotate(0,joints[2].axis);
-    joints[3].rotation.makeRotate(-90,joints[3].axis);
-    joints[4].rotation.makeRotate(0,joints[4].axis);
-    joints[5].rotation.makeRotate(0,joints[5].axis);
+    // joints[0].rotation.makeRotate(0,joints[0].axis);
+    // joints[1].rotation.makeRotate(-90,joints[1].axis);
+    // joints[2].rotation.makeRotate(0,joints[2].axis);
+    // joints[3].rotation.makeRotate(-90,joints[3].axis);
+    // joints[4].rotation.makeRotate(0,joints[4].axis);
+    // joints[5].rotation.makeRotate(0,joints[5].axis);
 
     bTriedOnce = false; 
 
 }
-void ofxURDriver::start(){
-    ofLog(OF_LOG_NOTICE)<<"Starting ofxURDriver Controller"<<endl;
+void ofxXArmDriver::start(){
+    ofLog(OF_LOG_NOTICE)<<"Starting ofxXArmDriver Controller"<<endl;
     startThread();
 }
 
-bool ofxURDriver::isConnected() {
+bool ofxXArmDriver::isConnected() {
     if( ofThread::isThreadRunning() ) {
         bool tConn = false;
         if(lock()) {
@@ -166,12 +172,12 @@ bool ofxURDriver::isConnected() {
 
 
 
-void ofxURDriver::disconnect(){
+void ofxXArmDriver::disconnect(){
     if( robot != NULL ) robot->halt();
     
 }
 
-bool ofxURDriver::isDataReady(){
+bool ofxXArmDriver::isDataReady(){
     if(bDataReady){
         bDataReady = false;
         return true;
@@ -179,7 +185,7 @@ bool ofxURDriver::isDataReady(){
         return false;
     }
 }
-vector<double> ofxURDriver::getToolPointRaw(){
+vector<double> ofxXArmDriver::getToolPointRaw(){
     vector<double> ret;
     lock();
     toolPointRaw.swapFront();
@@ -188,7 +194,7 @@ vector<double> ofxURDriver::getToolPointRaw(){
     return ret;
 }
 
-vector<double> ofxURDriver::getCurrentPose(){
+vector<double> ofxXArmDriver::getCurrentPose(){
     vector<double> ret;
     
     lock();
@@ -199,7 +205,7 @@ vector<double> ofxURDriver::getCurrentPose(){
     
     return ret;
 }
-vector<double> ofxURDriver::getJointAngles(){
+vector<double> ofxXArmDriver::getJointAngles(){
     vector<double> ret;
     lock();
     jointsProcessed.swapFront();
@@ -208,7 +214,7 @@ vector<double> ofxURDriver::getJointAngles(){
     return ret;
 }
 
-ofVec4f ofxURDriver::getCalculatedTCPOrientation(){
+ofVec4f ofxXArmDriver::getCalculatedTCPOrientation(){
     ofVec4f ret;
     lock();
     ret = ofVec4f(dtoolPoint.rotation.x(), dtoolPoint.rotation.y(), dtoolPoint.rotation.z(), dtoolPoint.rotation.w());
@@ -216,7 +222,7 @@ ofVec4f ofxURDriver::getCalculatedTCPOrientation(){
     return ret;
 }
 
-float ofxURDriver::getThreadFPS(){
+float ofxXArmDriver::getThreadFPS(){
     float fps = 0;
     lock();
     fps = timer.getFrameRate();
@@ -224,7 +230,7 @@ float ofxURDriver::getThreadFPS(){
     return fps;
 }
 
-Joint ofxURDriver::getToolPose(){
+Joint ofxXArmDriver::getToolPose(){
     Joint ret;
     lock();
     ret = tool;
@@ -232,13 +238,13 @@ Joint ofxURDriver::getToolPose(){
     return ret;
 }
 
-void ofxURDriver::moveJoints(vector<double> pos){
+void ofxXArmDriver::moveJoints(vector<double> pos){
     lock();
     posBuffer.push_back(pos);
     unlock();
 }
 
-void ofxURDriver::setSpeed(vector<double> speeds, double accel){
+void ofxXArmDriver::setSpeed(vector<double> speeds, double accel){
     lock();
     currentSpeed = speeds;
     acceleration = accel;
@@ -247,7 +253,7 @@ void ofxURDriver::setSpeed(vector<double> speeds, double accel){
     unlock();
 }
 
-void ofxURDriver::setPosition(vector<double> positions){
+void ofxXArmDriver::setPosition(vector<double> positions){
     lock();
     currentPosition = positions; 
     bMove = true;
@@ -257,7 +263,7 @@ void ofxURDriver::setPosition(vector<double> positions){
     unlock();
 }
 
-ofQuaternion ofxURDriver::convertAxisAngle(double rx, double ry, double rz) {
+ofQuaternion ofxXArmDriver::convertAxisAngle(double rx, double ry, double rz) {
     float angle = ofVec3f(rx, ry, rz).normalize().length();
     double s = sin(angle/2);
     float x = (rx) * s;
@@ -269,7 +275,7 @@ ofQuaternion ofxURDriver::convertAxisAngle(double rx, double ry, double rz) {
 
 
 
-vector <double> ofxURDriver::getAchievablePosition(vector <double> position){
+vector <double> ofxXArmDriver::getAchievablePosition(vector <double> position){
     
     float maxAccelDeg = 500.0;
     float maxSpeedPct = 1.0;
@@ -341,7 +347,7 @@ vector <double> ofxURDriver::getAchievablePosition(vector <double> position){
     return position;
 }
 
-void ofxURDriver::threadedFunction(){
+void ofxXArmDriver::threadedFunction(){
     while(isThreadRunning()){
         timer.tick();
         if(!bStarted && !bTriedOnce) {
@@ -362,8 +368,6 @@ void ofxURDriver::threadedFunction(){
                     }
                 }
             }
-            
-            
             
         }else{
             

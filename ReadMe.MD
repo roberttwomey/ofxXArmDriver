@@ -1,15 +1,15 @@
 
-# ofxURDriver
+# ofxXArmDriver
 
 ###### An openFrameworks addon for controlling and interacting with Universal Robots robotic arms.  
 
-`ofxURDriver` adapts ThomasTimm's [ur_modern_driver](https://github.com/ThomasTimm/ur_modern_driver) package for ROS to openFrameworks. Please see [ofxRobotArm](https://github.com/CreativeInquiry/ofxRobotArm) for examples on how to use this addon.
+`ofxXArmDriver` adapts ThomasTimm's [ur_modern_driver](https://github.com/ThomasTimm/ur_modern_driver) package for ROS to openFrameworks. Please see [ofxRobotArm](https://github.com/CreativeInquiry/ofxRobotArm) for examples on how to use this addon.
 
 ![KinematicModel](data/ezgif.com-video-to-gif%20(1).gif)
 
 
 ## Licensing
-`ofxURDriver` is licensed for **NON-COMMERCIAL USE ONLY**. 
+`ofxXArmDriver` is licensed for **NON-COMMERCIAL USE ONLY**. 
 
 Copyright (c) 2016, Daniel Moore, Madeline Gannon, and The Frank-Ratchye STUDIO for Creative Inquiry
 All rights reserved.

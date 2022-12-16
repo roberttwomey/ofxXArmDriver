@@ -1,6 +1,7 @@
 #pragma once
 #include "ofMain.h"
-#include "ur_kin.h"
+// #include "ur_kin.h"
+#include "uf_kin.h"
 //#include "UR5KinematicModel.h"
 //#include "UR10KinematicModel.h"
 //#include "RobotKinematicModel.h"
@@ -9,11 +10,11 @@
 #include "URUtils.h"
 // Copyright (c) 2016, Daniel Moore, Madeline Gannon, and The Frank-Ratchye STUDIO for Creative Inquiry All rights reserved.
 //
-class URIKFast{
+classXArmIKFast{
 public:
-    URIKFast();
-    URIKFast(RobotType type);
-    ~URIKFast();
+   XArmIKFast();
+   XArmIKFast(RobotType type);
+    ~XArmIKFast();
     
     int selectSolution(vector<vector<double> > & inversePosition, vector<double> currentQ, vector<double> weight);
     ofMatrix4x4 forwardKinematics(vector<double> pose);
@@ -25,6 +26,6 @@ public:
     
     
     vector<double> currentPosition;
-    URKinematics kinematics;
+    XArmKinematics kinematics;
     vector<vector<double> > preInversePosition;
 };

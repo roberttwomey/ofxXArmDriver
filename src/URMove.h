@@ -1,6 +1,6 @@
 //
 //  URMove.h
-//  ofxURDriver
+//  ofxXArmDriver
 //
 //  Created by Dan Moore on 2/20/16.
 // Copyright (c) 2016, Daniel Moore, Madeline Gannon, and The Frank-Ratchye STUDIO for Creative Inquiry All rights reserved.
@@ -13,7 +13,7 @@
 //#include "UR10KinematicModel.h"
 #include "ofxTiming.h"
 #include "Synchronized.h"
-#include "URIKFast.h"
+#include "XArmIKFast.h"
 class URMove {
 public:
     URMove();
@@ -76,6 +76,6 @@ public:
     
     bool m_bApplyKinematics = true;
     
-//    URIKFast urKinematics;
+//   XArmIKFast XArmKinematics;
 
 };
