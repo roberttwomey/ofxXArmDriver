@@ -7,8 +7,8 @@ XArmIKFast::XArmIKFast(RobotType type){
 }
 XArmIKFast::XArmIKFast(){
     // just pick a default Robot Type to start (FIX LATER)
-    ofLog() << "PICKING RobotType::UR10 as default Kinematic Model" << endl;
-    kinematics = XArmKinematics(RobotType::UR10);
+    ofLog() << "PICKING RobotType::XARM7 as default Kinematic Model" << endl;
+    kinematics = XArmKinematics(RobotType::XARM7);
 }
 XArmIKFast::~XArmIKFast(){
     

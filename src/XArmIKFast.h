@@ -1,7 +1,7 @@
 #pragma once
 #include "ofMain.h"
 // #include "ur_kin.h"
-#include "uf_kin.h"
+#include "xarm_kin.h"
 //#include "UR5KinematicModel.h"
 //#include "UR10KinematicModel.h"
 //#include "RobotKinematicModel.h"
