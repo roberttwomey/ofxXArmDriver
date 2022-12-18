@@ -22,7 +22,7 @@ public:
     vector<vector<double> > inverseKinematics(Joint pose);
     vector<vector<double> > inverseKinematics(ofMatrix4x4 pose);
     vector<vector<double> > inverseKinematics(vector<double> input);
-    vector<vector<double> > inverseKinematics(double o, double t, double th, double f, double fi, double s);
+    vector<vector<double> > inverseKinematics(double o, double t, double th, double f, double fi, double s, double j7=0.0);
     
     
     vector<double> currentPosition;

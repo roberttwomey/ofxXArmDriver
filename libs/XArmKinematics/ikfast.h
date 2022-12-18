@@ -322,7 +322,7 @@ IKFAST_API int GetNumFreeParameters();
 IKFAST_API int* GetFreeParameters();
 
 /// \brief the total number of indices of the chain
-IKFAST_API int GetNumJoints();
+// IKFAST_API int GetNumJoints();
 
 /// \brief the size in bytes of the configured number type
 IKFAST_API int GetIkRealSize();

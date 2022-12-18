@@ -189,11 +189,11 @@ int XArmIKFast::selectSolution(vector<vector<double> > & inversePosition, vector
 }
 
 
-vector<vector<double>> XArmIKFast::inverseKinematics(double o, double t, double th, double f, double fi, double s)
+vector<vector<double>> XArmIKFast::inverseKinematics(double o, double t, double th, double f, double fi, double s, double j7)
 {
     double q[6] = {o, t, th, f, fi, s};
     double* T = new double[16];
-    double q_sols[8*6];
+    double q_sols[8*7];
     int num_sols = kinematics.inverse(T, q_sols);
     vector<vector<double> > sols;
     for(int i=0;i<num_sols;i++){
@@ -215,6 +215,9 @@ vector<vector<double>> XArmIKFast::inverseKinematics(vector<double> input)
     if(input.size() == 6){
         return inverseKinematics(input[0], input[1], input[2], input[3], input[4], input[5]);
     }
+    if(input.size() == 7){
+        return inverseKinematics(input[0], input[1], input[2], input[3], input[4], input[5], input[6]);
+    }
     return vector<vector<double>>();
 }
 
@@ -230,7 +233,7 @@ vector<vector<double>> XArmIKFast::inverseKinematics(Joint pose){
 
 vector<vector<double>> XArmIKFast::inverseKinematics(ofMatrix4x4 pose)
 {
-    double q_sols[8*6];
+    double q_sols[8*7]; // 7 joints/DOF
     double* T = new double[16];
     T = toUR(pose);
     int num_sols = kinematics.inverse(T, q_sols);
