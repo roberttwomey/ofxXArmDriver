@@ -263,8 +263,9 @@ double* XArmIKFast::forwardKinematics(double o, double t, double th, double f, d
     double* T4 = new double[16];
     double* T5 = new double[16];
     double* T6 = new double[16];
+    double* T7 = new double[16];
     
-    kinematics.forward_all(q, T1, T2, T2, T4, T5, T6);
-    return T6;
+    kinematics.forward_all(q, T1, T2, T2, T4, T5, T6, T7);
+    return T7;
 }
 

@@ -30,21 +30,16 @@
    - IKFAST_NAMESPACE - Enclose all functions and classes in this namespace, the ``main`` function is excluded.
 
  */
-// #include <vector>
-// #include <list>
-// #include <stdexcept>
-// #include <cmath>
-
 #include "ofMain.h"
 
 // #ifndef IKFAST_HEADER_COMMON
-// #define IKFAST_HEADER_COMMON
+#define IKFAST_HEADER_COMMON
 
 /// should be the same as ikfast.__version__
 /// if 0x10000000 bit is set, then the iksolver assumes 6D transforms are done without the manipulator offset taken into account (allows to reuse IK when manipulator offset changes)
 #define IKFAST_VERSION 0x10000048
 
-// namespace ikfast {
+namespace ikfast {
 
 /// \brief holds the solution for a single dof
 template <typename T>
@@ -268,20 +263,26 @@ protected:
     std::list< IkSolution<T> > _listsolutions;
 };
 
+// }
 
-// The following code is dependent on the C++ library linking with.
-#ifdef IKFAST_HAS_LIBRARY
+// #endif // OPENRAVE_IKFAST_HEADER
 
-// defined when creating a shared object/dll
-#ifdef IKFAST_CLIBRARY
-#ifdef _MSC_VER
-#define IKFAST_API extern "C" __declspec(dllexport)
-#else
-#define IKFAST_API extern "C"
-#endif
-#else
+// // The following code is dependent on the C++ library linking with.
+// #ifdef IKFAST_HAS_LIBRARY
+
+// // defined when creating a shared object/dll
+// #ifdef IKFAST_CLIBRARY
+// #ifdef _MSC_VER
+// #define IKFAST_API extern "C" __declspec(dllexport)
+// #else
+// #define IKFAST_API extern "C"
+// #endif
+// #else
+// #define IKFAST_API
+// #endif
+
 #define IKFAST_API
-#endif
+
 
 // #ifdef IKFAST_NAMESPACE
 // namespace IKFAST_NAMESPACE {
@@ -294,6 +295,7 @@ protected:
 // #endif
 
 typedef double IkReal;
+
 
 /** \brief Computes all IK solutions given a end effector coordinates and the free joints.
 
@@ -334,8 +336,10 @@ IKFAST_API int GetIkType();
 /// \brief a hash of all the chain values used for double checking that the correct IK is used.
 IKFAST_API const char* GetKinematicsHash();
 
+} // IKFAST_NAMESPACE
+
 // #ifdef IKFAST_NAMESPACE
 // }
 // #endif
 
-#endif // IKFAST_HAS_LIBRARY
+// #endif // IKFAST_HAS_LIBRARY
